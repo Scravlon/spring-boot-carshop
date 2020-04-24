@@ -16,4 +16,10 @@ public class CarListingService {
     public List<CarListingModel> loadAllCars(){
         return carListingRepository.findAll();
     }
+
+    public List<CarListingModel> selectCarsByCarMake(String carmake){
+            return carListingRepository.selectMake(carmake);
+    }
+
+    public void insertNewCar(CarListingModel carlistingModel) {carListingRepository.save(carlistingModel);};
 }

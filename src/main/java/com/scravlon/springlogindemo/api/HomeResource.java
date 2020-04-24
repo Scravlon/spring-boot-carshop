@@ -3,6 +3,7 @@ package com.scravlon.springlogindemo.api;
 import com.scravlon.springlogindemo.dao.UserRepository;
 import com.scravlon.springlogindemo.models.User;
 import com.scravlon.springlogindemo.models.newUser;
+import com.scravlon.springlogindemo.models.updateProfileUser;
 import com.scravlon.springlogindemo.service.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -67,4 +68,30 @@ public class HomeResource {
         myUserDetailsService.addUser(u);
         return "welcome";
     }
+
+    @PostMapping("updateprofile")
+    public String updateprofile(@ModelAttribute updateProfileUser updateProfileUser, HttpServletResponse response) throws IOException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        response.setContentType("text/html;charset=gb2312");
+        PrintWriter out = response.getWriter();
+        User u = myUserDetailsService.findUserObject(auth.getName());
+        if(!updateProfileUser.getOldpassword().equals(u.getPassword())){
+            out.print("<script language=\"javascript\">alert('Old password does not match！');</script>");
+            return "updateprofile";
+        }
+        if(updateProfileUser.getOldpassword().equals(updateProfileUser.getNewpassword())) {
+            out.print("<script language=\"javascript\">alert('New password cannot be the same！');</script>");
+            return "updateprofile";
+        }
+        if(updateProfileUser.getNewpassword().equals(updateProfileUser.getRepassword())){
+            myUserDetailsService.updatePassword(auth.getName(),updateProfileUser.getNewpassword());
+            out.print("<script language=\"javascript\">alert('Password update successfully ！');</script>");
+            return "userprofile";
+        } else{
+            out.print("<script language=\"javascript\">alert('New password set error!');</script>");
+            return "updateprofile";
+        }
+
+    }
+
 }

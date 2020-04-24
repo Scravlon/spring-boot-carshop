@@ -23,6 +23,12 @@ public class MyUserDetailsService implements UserDetailsService {
         return user.map(MyUserDetail::new).get();
     }
 
+    public User findUserObject(String s) {
+        Optional<User> user = userRepository.findByUserName(s);
+        System.out.print(user.isPresent());
+        return user.get();
+    }
+
     public boolean findUser(String s) {
         Optional<User> user = userRepository.findByUserName(s);
         System.out.print(user.isPresent());
@@ -31,5 +37,13 @@ public class MyUserDetailsService implements UserDetailsService {
 
     public void addUser(User user){
         userRepository.save(user);
+    }
+
+    public void updatePassword(String name, String password) {
+        Optional<User> newPassUser = userRepository.findByUserName(name);
+        newPassUser.orElseThrow(() -> new UsernameNotFoundException("Not found: "));
+        User u = newPassUser.get();
+        u.setPassword(password);
+        userRepository.save(u);
     }
 }

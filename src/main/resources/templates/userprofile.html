@@ -4,14 +4,60 @@
     <title>Greetings</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" href="/css/cardisplay.css">
+    <link rel="stylesheet" href="/css/navigationbar.css">
+    <link rel="stylesheet" href="/css/loader.css">
+
+
 </head>
 <body>
+  <script>
+  </script>
+
+
+  <h1>Welcome</h1>
+  <p th:text="'Hello, ' + ${name} + '!'" />
+
+  <ul class="ul-nav-bar">
+   <li class="li-nav"><a href="/updateprofile">Update my profile</a></li>
+   <li class="li-nav"><a href="/">To Home page</a></li>
+   <li class="li-nav"><a href="/addlisting">Add a listing</a></li>
+   <li class="li-nav"><a href="/logout">Logout</a></li>
+ </ul>
+<br>
+<div id="btnContainer">
+    <button class="btn" onclick="listView()"><i class="fa fa-bars"></i> List</button>
+    <button class="btn active" onclick="gridView()"><i class="fa fa-th-large"></i> Grid</button>
+</div>
+<br>
+<p>Select by Make: </p><select id="selectmake" onchange="updateMake()"> <option value="">-</option></select></br>
+<div id="loader" class="loader" style="display: none;"></div>
+
+  <div id="carlistingcontainer">
+
+  </div>
+  <br/>
 <script>
+
+function updateMake(){
+  gridView();
+  var btns = container.getElementsByClassName("btn");
+  var current = document.getElementsByClassName("active");
+  current[0].className = current[0].className.replace(" active", "");
+  btns[1].className += " active";
+
+  const myNode = document.getElementById("carlistingcontainer");
+  myNode.innerHTML = '';
+  var selectMake = document.getElementById("selectmake");
+  var selectedvalue = selectMake.value;
+  if(selectd=""){request("/getcars");}
+  else{request('/getcars/'+selectedvalue);}
+  }
+
 
 function jsontodivone(jcarobject1){
         var str = '<div class="row"><div class="column" style="border-style: solid;background-color:#bbb;"><h2>'+jcarobject1['carmake'] + ' ' + jcarobject1['carmodel']+ ' '
         + jcarobject1['variant'] +'</h2><p>Engine CC: ' + jcarobject1['enginecc'] + ' | Horsepower: ' + jcarobject1['horsepower'] + ' | Torque: ' + jcarobject1['torque']+'</p></div></div>';
-        document.getElementById('carlistingcontainer').insertAdjacentHTML("afterend",str);
+        document.getElementById('carlistingcontainer').insertAdjacentHTML("beforeend",str);
     }
 
     function jsontodiv(jcarobject1, jcarobject2){
@@ -19,12 +65,11 @@ function jsontodivone(jcarobject1){
         + jcarobject1['variant'] +'</h2><p>Engine CC: ' + jcarobject1['enginecc'] + ' | Horsepower: ' + jcarobject1['horsepower'] + ' | Torque: ' + jcarobject1['torque']+
         '</p></div><div class="column" style="border-style: solid;background-color:#bbb;"><h2>'+jcarobject2['carmake'] + ' ' + jcarobject2['carmodel']+ ' ' + jcarobject2['variant'] +
         '</h2><p>Engine CC: ' + jcarobject2['enginecc'] + ' | Horsepower: ' + jcarobject2['horsepower'] + ' | Torque: ' + jcarobject2['torque']+'</p></div></div>';
-        //alert(jcarobject1['carmake']);
-        //alert(jcarobject2['carmake']);
         document.getElementById('carlistingcontainer').insertAdjacentHTML("beforeend",str);
     }
 
     function request(url) {
+      toogleLoader(true)
       const xhr = new XMLHttpRequest();
       xhr.timeout = 2000;
       xhr.onreadystatechange = function(e) {
@@ -36,19 +81,15 @@ function jsontodivone(jcarobject1){
                    document.getElementById('carlistingcontainer').insertAdjacentHTML("beforeend","<h3>Content Empty for now!</h3>");
            }
            if(carlist.length%2==0){
-                for(i = 0; i < carlist.length-1; i+=2){
+                for(i = 0; i < carlist.length-1; i+=2)
                     jsontodiv(carlist[i],carlist[i+1]);
-                }
-           } else{
-                for(i = 0; i < carlist.length-1; i+=2){
-                    jsontodiv(carlist[i],carlist[i+1]);
-                }
-                jsontodivone(carlist[carlist.length-1]);
-           }
 
-          } else {
-              alert("Unable to reach server!");
-          }
+           } else{
+                for(i = 0; i < carlist.length-1; i+=2){jsontodiv(carlist[i],carlist[i+1]);}
+                jsontodivone(carlist[carlist.length-1]);
+              }
+                toogleLoader(false);
+          } else {alert("Unable to reach server!");}
         }
       }
       xhr.ontimeout = function () {
@@ -59,33 +100,17 @@ function jsontodivone(jcarobject1){
     }
     request("/getcars");
 
-</script>
-<h1>Welcome</h1>
-<p th:text="'Hello, ' + ${name} + '!'" />
 
-<a href="/">To Home page</a><br/>
-<a href="/admin">To Admin Page</a><br/>
-<a href="/logout">Logout</a>
-
-<div id="btnContainer">
-    <button class="btn" onclick="listView()"><i class="fa fa-bars"></i> List</button>
-    <button class="btn active" onclick="gridView()"><i class="fa fa-th-large"></i> Grid</button>
-</div>
-<br>
-
-<div id="carlistingcontainer">
-
-</div>
-
-
-<br/>
-<a href="/updateprofile">Update my profile</a>
-
-<script>
 
 var elements = document.getElementsByClassName("column");
-
 var i;
+function toogleLoader(boolLoader) {
+  if(boolLoader)
+  document.getElementById("loader").style.display = "block";
+  else
+  document.getElementById("loader").style.display = "none";
+
+}
 
 function listView() {
   for (i = 0; i < elements.length; i++) {
@@ -98,7 +123,6 @@ function gridView() {
     elements[i].style.width = "50%";
   }
 }
-
 var container = document.getElementById("btnContainer");
 var btns = container.getElementsByClassName("btn");
 for (var i = 0; i < btns.length; i++) {
@@ -108,7 +132,35 @@ for (var i = 0; i < btns.length; i++) {
     this.className += " active";
   });
 }
-</script>
 
+function populateSelectCarMake(){
+  var selectMake = document.getElementById("selectmake");
+
+  const xhr = new XMLHttpRequest();
+  xhr.timeout = 2000;
+  xhr.onreadystatechange = function(e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+
+       const carlist = JSON.parse(xhr.response);
+       console.log(xhr.response);
+       for(i = 0; i < carlist.length;i++){
+        var option = document.createElement('option');
+        option.setAttribute('value', carlist[i]['carmake']);
+        option.appendChild(document.createTextNode(carlist[i]['carmake']));
+        selectMake.appendChild(option);
+       }
+
+      } else {alert("Unable to reach server!");}
+    }
+  }
+  xhr.ontimeout = function () {
+    alert("Request time out");
+  }
+  xhr.open('get', '/getmakes', true)
+  xhr.send();
+}
+populateSelectCarMake();
+</script>
 </body>
 </html>
